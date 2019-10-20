@@ -1,0 +1,28 @@
+1、联机RPC 服务
+   
+   RPCClient.client.setHost("127.0.0.1").setPort(7001).setAppName("mb-member").start();
+   
+          端口：7001
+   host:为部署在云端的IP地址
+   appName 的规定：  
+   	member 为mb-member
+    douban 为mb-douban
+    z3950  为mb-z3950
+    
+    
+2、登记服务
+   2.1、在dto暴露你的接口
+   2.2、在你项目中实现暴露的接口
+   2.3、启动服务的时候登记接口信息
+        RPCClient.setRegisterServiceInfo("mb.test.RPCTest", "mb.member.api.book.TestImpl");
+                           参数说明
+		             第一位是接口的名称。
+		             第二位是接口实现类的名称
+		            
+3、调用
+   3.1 通过代理实现接口
+   RPCTest test = RPCProxy.getImplements(RPCTest.class);
+   3.2 调用接口方法
+   test.hello() 
+    
+       
