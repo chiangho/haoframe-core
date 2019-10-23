@@ -31,7 +31,7 @@ public class SqlGenTool {
 			}
 			index++;
 		}
-		sb.append(" from "+ table.getTableName());
+		sb.append(" from `"+table.getTableName()+"` ");
 		return new Sql(sb.toString(),null);
 	}
 
@@ -50,7 +50,7 @@ public class SqlGenTool {
 			}
 			index++;
 		}
-		sb.append(" from "+ table.getTableName());
+		sb.append(" from `"+table.getTableName()+"` ");
 		
 		List<Object> args = new ArrayList<Object>();
 		if(bean!=null) {
@@ -86,7 +86,7 @@ public class SqlGenTool {
 		if(!table.hasColumn("code")) {
 			throw new HaoException(ErrorInfo.build_sql_error,"数据库中指定的CODE不存在");
 		}
-		String sql = "delete from "+table.getTableName()+" where `code`=?";
+		String sql = "delete from `"+table.getTableName()+"` where `code`=?";
 		List<Object> args = new ArrayList<Object>();
 		args.add(code);
 		return new Sql(sql,args);
@@ -96,7 +96,7 @@ public class SqlGenTool {
 		if(!table.hasColumn("code")) {
 			throw new HaoException(ErrorInfo.build_sql_error,"数据库中指定的CODE不存在");
 		}
-		String sql = "select * from "+table.getTableName()+" where `code`=?";
+		String sql = "select * from `"+table.getTableName()+"` where `code`=?";
 		List<Object> args = new ArrayList<Object>();
 		args.add(code);
 		return new Sql(sql,args);
@@ -141,7 +141,7 @@ public class SqlGenTool {
 
 	public static <T> Sql getDeleteSql(Table table, T where) {
 		StringBuffer sb = new StringBuffer();
-		sb.append("delete from "+table.getTableName()+" ");
+		sb.append("delete from `"+table.getTableName()+"` ");
 		List<Object> args = new ArrayList<Object>();
 		if(where!=null) {
 			StringBuffer whereString = new StringBuffer();
