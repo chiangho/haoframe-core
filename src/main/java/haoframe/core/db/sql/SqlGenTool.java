@@ -132,7 +132,7 @@ public class SqlGenTool {
 				}
 			}
 			if(index>0) {
-				String sql = "insert into "+table.getTableName()+"("+fields+")values("+values+")";
+				String sql = "insert into `"+table.getTableName()+"`("+fields+")values("+values+")";
 				return new Sql(sql,args);
 			}
 		}	
@@ -168,7 +168,7 @@ public class SqlGenTool {
 
 	public static <T> Sql getUpdateSql(Table table, T bean,T where) {
 		StringBuffer sb = new StringBuffer();
-		sb.append("update "+table.getTableName()+" ");
+		sb.append("update `"+table.getTableName()+"` ");
 		int fieldSize = 0;
 		List<Object> args = new ArrayList<Object>();
 		if(bean!=null) {
@@ -221,7 +221,7 @@ public class SqlGenTool {
 			throw new HaoException(ErrorInfo.build_sql_error,"数据库中指定的CODE不存在");
 		}
 		StringBuffer sb = new StringBuffer();
-		sb.append("update "+table.getTableName()+" ");
+		sb.append("update `"+table.getTableName()+"` ");
 		int fieldSize = 0;
 		List<Object> args = new ArrayList<Object>();
 		if(bean!=null) {
