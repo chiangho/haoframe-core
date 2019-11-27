@@ -184,7 +184,7 @@ public class BaseDao<T> {
 		}
 	}
 	
-	private List<T> query(String sql,List<Object> args){
+	public List<T> query(String sql,List<Object> args){
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		LOG.info("---------the sql is {}---------" , sql);
