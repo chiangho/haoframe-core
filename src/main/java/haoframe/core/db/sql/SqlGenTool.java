@@ -103,6 +103,47 @@ public class SqlGenTool {
 	}
 
 	
+	
+	public static <T> Sql getInsterBatchSql(Table table, List<T> list) {
+		StringBuffer sb = new StringBuffer();
+		StringBuffer fields = new StringBuffer();
+		List<String> fieldNames  = new ArrayList<String>();
+		StringBuffer values = new StringBuffer("(");
+		int index=0;
+		for(String fieldName:table.getColumnMap().keySet()) {
+			Column c = table.getColumnInfo(fieldName);
+			if(index==0) {
+				fields.append("`"+c.getName()+"`");
+				values.append("?");
+			}else {
+				fields.append(",`"+c.getName()+"`");
+				values.append(",?");
+			}
+			fieldNames.add(fieldName);
+			index++;
+		}
+		values.append(")");
+		sb.append("insert into `"+table.getTableName()+"`("+fields+")values");
+		
+		index=0;
+		List<Object> args = new ArrayList<Object>();
+		for(T bean :list) {
+			
+			if(index==(list.size()-1)) {
+				sb.append(values);
+			}else {
+				sb.append(values+",");
+			}
+			for(String fieldName:fieldNames) {
+				Object value = ClassUtils.getFieldValue(bean, fieldName);
+				args.add(value);
+			}
+		}
+		return new Sql(sb.toString(),args);
+	}
+	
+	
+	
 	/**
 	 * 创建插入语句
 	 * @param table
@@ -250,5 +291,7 @@ public class SqlGenTool {
 		args.add(code);
 		return new Sql(sb.toString(),args);
 	}
+
+	
 
 }

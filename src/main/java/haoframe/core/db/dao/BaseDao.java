@@ -78,6 +78,22 @@ public class BaseDao<T> {
 		execute(sql.getSql(),sql.getArgs());
 	}
 	
+	
+	public void insertBatch(List<T> list) {
+		if(list==null||list.size()==0) {
+			throw new HaoException(ErrorInfo.build_sql_error, "构建inster sql 对象不能为null");
+		}
+		Table table = Table.getTable(this.clazz);
+		if(table==null) {
+			throw new HaoException(ErrorInfo.build_sql_error, "构建inster sql 收件查询到注解的表信息");
+		}
+		Sql sql = SqlGenTool.getInsterBatchSql(table,list);
+		if(sql==null) {
+			return;
+		}
+		execute(sql.getSql(),sql.getArgs());
+	}
+	
 	public void update(T bean,T where) {
 		if(bean==null) {
 			throw new HaoException(ErrorInfo.build_sql_error, "构建inster sql 对象不能为null");
@@ -376,6 +392,22 @@ public class BaseDao<T> {
 		page.setTotalRows(totalRecord);
 		String pageSql = getPageSql(page,sql.getSql());
 		List<T> list = query(pageSql,sql.getArgs());
+		page.setItems(list);
+	}
+	
+	
+	/**
+	 * 分页查询
+	 * @param page
+	 * @param sql
+	 * @param args
+	 */
+	public void queryPageList(Page<T> page,String sql,List<Object> args) {
+		String countSql = this.getCountSql(sql);
+		int totalRecord =  queryInt(countSql,args);
+		page.setTotalRows(totalRecord);
+		String pageSql = getPageSql(page,sql);
+		List<T> list = query(pageSql,args);
 		page.setItems(list);
 	}
 	
