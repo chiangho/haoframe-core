@@ -2,16 +2,33 @@ package haoframe.core.db.sql;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 
 /**
  * 分页信息
  * @author chianghao
+ * @param <T>
  *
  */
-public class Page implements Serializable{
+public class Page<T> implements Serializable{
 
 	private static final long serialVersionUID = -2513132642456114868L;
+	
+	
+	public Page() {};
+	
+	/**
+	 * 
+	 * @param pageIndex  页数
+	 * @param pageSize   每页大小
+	 */
+	public Page(int pageIndex,int pageSize) {
+		this.pageIndex = pageIndex;
+		this.pageSize = pageSize;
+	}
+	
 	
 	/** 从第几条记录开始 **/
 	protected int offset;
@@ -29,6 +46,9 @@ public class Page implements Serializable{
 	
 	/** 总页数 **/
 	protected long pageCount;
+	
+	
+	private List<T> items;
 	
 	/** 排序的字段 **/
 	private Map<String,String> order = new HashMap<String, String>();
@@ -81,4 +101,13 @@ public class Page implements Serializable{
 	public void setPageIndex(int pageIndex) {
 		this.pageIndex = pageIndex;
 	}
+
+	public List<T> getItems() {
+		return items;
+	}
+
+	public void setItems(List<T> items) {
+		this.items = items;
+	}
+	
 }

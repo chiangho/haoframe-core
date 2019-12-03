@@ -345,8 +345,8 @@ public class BaseDao<T> {
 		return query(sql);
 	}
 
-	public List<T> queryPageList(Page page){
-		return queryPageList(page,null);
+	public void queryPageList(Page<T> page){
+		queryPageList(page,null);
 	}
 	
 	public T queryByCode(Object code) {
@@ -368,18 +368,19 @@ public class BaseDao<T> {
 	 * @param bean
 	 * @return
 	 */
-	public List<T> queryPageList(Page page,T bean){
+	public void queryPageList(Page<T> page,T bean){
 		Table table = Table.getTable(this.clazz);
 		Sql sql = SqlGenTool.getSelectSql(table,bean);
 		String countSql = this.getCountSql(sql.getSql());
 		int totalRecord =  queryInt(countSql,sql.getArgs());
 		page.setTotalRows(totalRecord);
 		String pageSql = getPageSql(page,sql.getSql());
-		return query(pageSql,sql.getArgs());
+		List<T> list = query(pageSql,sql.getArgs());
+		page.setItems(list);
 	}
 	
 	
-	private String getPageSql(Page page, String sql) {
+	private String getPageSql(Page<T> page, String sql) {
 		StringBuilder sqlBuffer = new StringBuilder(sql);
 		Map<String, String> order = page.getOrder();
 		if (order != null && !order.isEmpty()) {
