@@ -49,30 +49,34 @@ public class DatabaseTool {
 		Map<String,Table> eMap = Table.getTableMap();
 		for(String key:eMap.keySet()) {
 			Table table= eMap.get(key);
-			AbstractDataMeta dm = AbstractDataMeta.createDataMeta(DBType.mysql,dataSourceName);
-			List<String> sqlCommands = dm.getDDLSql(table);
-			Collections.sort(sqlCommands,new Comparator<String>() {
-				@Override
-				public int compare(String arg0, String arg1) {
-					boolean isdrop1  = arg0.contains("DROP");
-					boolean isdrop2  = arg1.contains("DROP");
-					if(isdrop1&&isdrop2) {
-						return 1;
-					}else if(isdrop2&&!isdrop2) {
-						return 0;
-					}else if(!isdrop2&&isdrop2) {
-						return -1;
-					}else {
-						return -1;
-					}
-				}
-				
-			});
-			log.info(JSON.toJSONString(sqlCommands));
 			try {
-				dm.executeBatch(sqlCommands);
-			} catch (HaoException e1) {
-				e1.printStackTrace();
+				AbstractDataMeta dm = AbstractDataMeta.createDataMeta(DBType.mysql,dataSourceName);
+				List<String> sqlCommands = dm.getDDLSql(table);
+				Collections.sort(sqlCommands,new Comparator<String>() {
+					@Override
+					public int compare(String arg0, String arg1) {
+						boolean isdrop1  = arg0.contains("DROP");
+						boolean isdrop2  = arg1.contains("DROP");
+						if(isdrop1&&isdrop2) {
+							return 1;
+						}else if(isdrop2&&!isdrop2) {
+							return 0;
+						}else if(!isdrop2&&isdrop2) {
+							return -1;
+						}else {
+							return -1;
+						}
+					}
+					
+				});
+				log.info(JSON.toJSONString(sqlCommands));
+				try {
+					dm.executeBatch(sqlCommands);
+				} catch (HaoException e1) {
+					e1.printStackTrace();
+				}
+			}catch(Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

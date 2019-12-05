@@ -31,7 +31,7 @@ public class MysqlDataMeta extends AbstractDataMeta {
 
 	@Override
 	public List<String> createTableDDL(Table table) {
-		StringBuffer sb = new StringBuffer(" create table " + table.getTableName() + " ( ");
+		StringBuffer sb = new StringBuffer(" create table `" + table.getTableName() + "` ( ");
 		for (String key : table.getColumnMap().keySet()) {
 			Column column = table.getColumnMap().get(key);
 			String columnSql = getColumnSql(column);
