@@ -60,6 +60,8 @@ public class Column {
 	private void javaTypeToDbType() {
 		if(this.fieldType.getName().equals("java.lang.Object")) {
 			this.type = ColumnType.CLOB;
+		}else if(this.fieldType.isAssignableFrom(Boolean.class)||this.fieldType.isAssignableFrom(boolean.class)) {
+			this.type = ColumnType.TINYINT;
 		}else if(this.fieldType.isAssignableFrom(BigDecimal.class)) {
 			//小数
 			this.type = ColumnType.DECIMAL;

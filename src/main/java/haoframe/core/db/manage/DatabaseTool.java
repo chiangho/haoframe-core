@@ -49,6 +49,7 @@ public class DatabaseTool {
 		Map<String,Table> eMap = Table.getTableMap();
 		for(String key:eMap.keySet()) {
 			Table table= eMap.get(key);
+			log.info("====================操作表{}============================",table.getTableName());
 			try {
 				AbstractDataMeta dm = AbstractDataMeta.createDataMeta(DBType.mysql,dataSourceName);
 				List<String> sqlCommands = dm.getDDLSql(table);
