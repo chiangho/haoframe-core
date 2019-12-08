@@ -8,6 +8,7 @@ public class WebCookie implements Cookie{
 
 	private String name;
 
+	
 	private String value;
 
 	private String comment;
