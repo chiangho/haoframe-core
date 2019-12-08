@@ -138,6 +138,7 @@ public class SqlGenTool {
 				Object value = ClassUtils.getFieldValue(bean, fieldName);
 				args.add(value);
 			}
+			index++;
 		}
 		return new Sql(sb.toString(),args);
 	}
