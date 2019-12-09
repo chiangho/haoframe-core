@@ -244,6 +244,8 @@ public class Column {
 				return rs.getString(name);
 			}else if(this.fieldType.isAssignableFrom(Integer.class)||this.fieldType.isAssignableFrom(int.class)) {
 				return rs.getInt(name);
+			}else if(this.fieldType.isAssignableFrom(Boolean.class)||this.fieldType.isAssignableFrom(boolean.class)) {
+				return rs.getBoolean(name);
 			}else if(this.fieldType.isAssignableFrom(Long.class)||this.fieldType.isAssignableFrom(long.class)) {
 				//长整形
 				return rs.getLong(name);

@@ -174,7 +174,7 @@ public class BaseDao<T> {
 					}else if ((value instanceof BigInteger)) {
 						ps.setBigDecimal(i, new BigDecimal((BigInteger) value));
 					}else if ((value instanceof Boolean)) {
-						ps.setInt(i, ((Boolean) value).booleanValue() ? 0 : 1);
+						ps.setInt(i, ((Boolean) value).booleanValue() ? 1 : 0);
 					}else {
 						ps.setObject(i, value);
 					}
@@ -223,7 +223,7 @@ public class BaseDao<T> {
 					}else if ((value instanceof BigInteger)) {
 						ps.setBigDecimal(i, new BigDecimal((BigInteger) value));
 					}else if ((value instanceof Boolean)) {
-						ps.setInt(i, ((Boolean) value).booleanValue() ? 0 : 1);
+						ps.setInt(i, ((Boolean) value).booleanValue() ? 1 : 0);
 					}else {
 						ps.setObject(i, value);
 					}
