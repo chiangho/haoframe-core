@@ -35,4 +35,29 @@ public class FileUtils {
 		return Base64.getEncoder().encodeToString(data);
 	}
 	
+	
+	public static byte[] is2ByeteArray(InputStream is){
+		try{
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			byte[] buff = new byte[100];
+			int rc = 0;
+			while((rc=is.read(buff, 0, 100))>0) {
+				baos.write(buff, 0, rc);
+			}
+			return baos.toByteArray();
+		}catch(Exception e) {
+			
+		}finally {
+			try {
+				is.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+		
+	}
+
+	
+	
 }
