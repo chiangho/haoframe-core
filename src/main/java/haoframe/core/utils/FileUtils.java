@@ -1,8 +1,11 @@
 package haoframe.core.utils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Base64;
 
 public class FileUtils {
@@ -58,6 +61,42 @@ public class FileUtils {
 		
 	}
 
+	
+	public static String getFilePath(String fileName,String... paths) {
+		StringBuffer sb = new StringBuffer();
+		if(paths!=null) {
+			for(String path:paths) {
+				sb.append("/"+path);
+			}
+		}
+		sb.append("/"+fileName);
+		return sb.toString();
+	}
+	
+	public static void write(byte[] imgbyte,String  rootDir ,String fileName,String... paths) {
+		try {
+			File root = new File(rootDir);
+			if(!root.exists()) {
+				root.mkdir();
+			}
+			File imageFileDir=root;
+			if(paths!=null) {
+				for(String path:paths) {
+					imageFileDir = new File(imageFileDir,path);
+					if(!imageFileDir.exists()) {
+						imageFileDir.mkdir();
+					}
+				}
+			}
+			File imageFile = new File(imageFileDir,fileName);
+			OutputStream os = new FileOutputStream(imageFile);
+			os.write(imgbyte, 0, imgbyte.length);
+			os.flush();
+			os.close();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	
 }
