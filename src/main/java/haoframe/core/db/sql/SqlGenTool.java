@@ -293,6 +293,18 @@ public class SqlGenTool {
 		return new Sql(sb.toString(),args);
 	}
 
-	
+	public static Sql SqlWhereToSql(List<SqlWhere> wheres) {
+		if(wheres==null||wheres.isEmpty()) {
+			return null;
+		}
+		StringBuffer sb = new StringBuffer();
+		List<Object> args = new ArrayList<Object>();
+		for(SqlWhere where:wheres) {
+			Sql sql = where.getSql();
+			sb.append(sql.getSql());
+			args.addAll(sql.getArgs());
+		}
+		return new Sql(sb.toString(),args);
+	}
 
 }
