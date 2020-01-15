@@ -73,6 +73,25 @@ public class FileUtils {
 		return sb.toString();
 	}
 	
+	
+	public static File getStoreFile(String fileName,String  rootDir,String... paths) {
+		File root = new File(rootDir);
+		if(!root.exists()) {
+			root.mkdir();
+		}
+		File imageFileDir=root;
+		if(paths!=null) {
+			for(String path:paths) {
+				imageFileDir = new File(imageFileDir,path);
+				if(!imageFileDir.exists()) {
+					imageFileDir.mkdir();
+				}
+			}
+		}
+		File imageFile = new File(imageFileDir,fileName);
+		return imageFile;
+	}
+	
 	public static void write(byte[] imgbyte,String  rootDir ,String fileName,String... paths) {
 		try {
 			File root = new File(rootDir);
