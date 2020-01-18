@@ -304,7 +304,16 @@ public class SqlGenTool {
 			sb.append(sql.getSql());
 			args.addAll(sql.getArgs());
 		}
-		return new Sql(sb.toString(),args);
+		
+		String sql = sb.toString().trim();
+		if(sql.toUpperCase().endsWith("AND")) {
+			sql  = sql.substring(0,sql.length()-3);
+		}
+		if(sql.toUpperCase().endsWith("OR")) {
+			sql  = sql.substring(0,sql.length()-2);
+		}
+		
+		return new Sql(sql,args);
 	}
 
 }

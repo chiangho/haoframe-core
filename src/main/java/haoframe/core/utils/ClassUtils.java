@@ -62,14 +62,26 @@ public class ClassUtils {
 		}
 	}
 	
-	public static Object getFieldValue(Object bean, String fieldName) {
-		Field field=null;
+	
+	public static Field getField(Class<?> clazz,String fieldName) {
+		if(clazz.getName().equals("java.lang.Object")) {
+			return null;
+		}
+		Field field = null;
 		try {
-			field = bean.getClass().getDeclaredField(fieldName);
+			field = clazz.getDeclaredField(fieldName);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
-		} 
+		}
+		if(field==null) {
+			return getField(clazz.getSuperclass(),fieldName);
+		}else {
+			return field;
+		}
+	}
+	
+	public static Object getFieldValue(Object bean, String fieldName) {
+		Field field=getField(bean.getClass(),fieldName);
 		if(field==null) {
 			return null;
 		}
