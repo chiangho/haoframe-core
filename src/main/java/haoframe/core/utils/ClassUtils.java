@@ -7,13 +7,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 
 /**
  * java 类对象工具
@@ -71,7 +69,7 @@ public class ClassUtils {
 		try {
 			field = clazz.getDeclaredField(fieldName);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		if(field==null) {
 			return getField(clazz.getSuperclass(),fieldName);
@@ -136,25 +134,25 @@ public class ClassUtils {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
-	public static <T> List<T> copyList(List<?> list,Class<?> tagClass){
-		if(list!=null&&list.size()>0) {
-			try {
-				List<T> tagList = new ArrayList<T>();
-				for(Object obj:list) {
-					T bean = (T) tagClass.newInstance();
-					BeanUtils.copyProperties(obj, bean);
-					tagList.add(bean);
-				}
-				return tagList;
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
+//	@SuppressWarnings("unchecked")
+//	public static <T> List<T> copyList(List<?> list,Class<?> tagClass){
+//		if(list!=null&&list.size()>0) {
+//			try {
+//				List<T> tagList = new ArrayList<T>();
+//				for(Object obj:list) {
+//					T bean = (T) tagClass.newInstance();
+//					BeanUtils.copyProperties(obj, bean);
+//					tagList.add(bean);
+//				}
+//				return tagList;
+//			} catch (InstantiationException e) {
+//				e.printStackTrace();
+//			} catch (IllegalAccessException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		return null;
+//	}
 	
 //	static class A{
 //		String name;
