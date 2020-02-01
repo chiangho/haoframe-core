@@ -34,7 +34,7 @@ public class ResultMapTool {
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new HaoException("Mapper_Result_Error","LinkedList<T> list = new LinkedList<T>();");
+			throw new HaoException("Mapper_Result_Error",e.getMessage());
 		}
 	}
 
