@@ -1,8 +1,13 @@
 package haoframe.core.db.sql;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import haoframe.core.db.model.Column;
 import haoframe.core.db.model.Table;
@@ -17,6 +22,8 @@ import haoframe.core.utils.ClassUtils;
  */
 public class ResultMapTool {
 
+	static Logger log = LoggerFactory.getLogger(ResultMapTool.class);
+	
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> getList(ResultSet rs, Class<?> clazz) {
 		Table table = Table.getTable(clazz);
@@ -26,13 +33,35 @@ public class ResultMapTool {
 				T bean = (T) clazz.newInstance();
 				for(String fieldName:table.getColumnMap().keySet()) {
 					Column column = table.getColumnInfo(fieldName);
-					Object value  = column.getValue(rs);
-					ClassUtils.setFieldValue(bean, fieldName, value);
+					try {
+						Object value  = column.getValue(rs);
+						ClassUtils.setFieldValue(bean, fieldName, value);
+					}catch(Exception e1) {
+						log.error("数据查询字段映射出错！fieldName {}",column.getName());
+					}
 				}
 				list.addLast(bean);
 			}
 			return list;
 		} catch (Exception e) {
+			e.printStackTrace();
+			throw new HaoException("Mapper_Result_Error",e.getMessage());
+		}
+	}
+
+	public static List<Object[]> getListArray(ResultSet rs) {
+		try {
+			int count = rs.getMetaData().getColumnCount();
+			List<Object[]> list = new ArrayList<Object[]>();
+			while (rs.next()) {
+				Object[] row = new Object[count];
+				for(int i=1;i<=count;i++) {
+					row[(i-1)] =  rs.getObject(i);
+				}
+				list.add(row);
+			}
+			return list;
+		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new HaoException("Mapper_Result_Error",e.getMessage());
 		}

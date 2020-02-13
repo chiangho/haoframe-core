@@ -200,6 +200,67 @@ public class BaseDao<T> {
 		}
 	}
 	
+	
+	
+	public List<Object[]> queryListArray(String sql,List<Object> args){
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		LOG.info("---------the sql is {}---------" , sql);
+		SqlSession sqlSession = getNativeSqlSession();
+		Connection conn = sqlSession.getConnection();
+		try {
+			ps = conn.prepareStatement(sql);
+			if(args!=null&&args.size()>0) {
+				int i=1;
+				for(Object value:args) {
+					LOG.info("==>" + value);
+					if ((value instanceof Date)) {
+						ps.setTimestamp(i, new Timestamp(((Date) value).getTime()));
+					}else if ((value instanceof Blob)) {
+						ps.setBlob(i, (Blob) value);
+					}else if ((value instanceof Clob)) {
+						ps.setClob(i, (Clob) value);
+					}else if ((value instanceof BigDecimal)) {
+						ps.setBigDecimal(i, (BigDecimal) value);
+					}else if ((value instanceof BigInteger)) {
+						ps.setBigDecimal(i, new BigDecimal((BigInteger) value));
+					}else if ((value instanceof Boolean)) {
+						ps.setInt(i, ((Boolean) value).booleanValue() ? 1 : 0);
+					}else {
+						ps.setObject(i, value);
+					}
+					i++;
+				}
+			}
+			rs = ps.executeQuery();
+			List<Object[]> list = ResultMapTool.getListArray(rs);
+			return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new HaoException("Mapper_Result_Error", e.getMessage());
+		}finally {
+			if(ps!=null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(rs!=null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(sqlSession != null){
+                closeNativeSqlSession(sqlSession);
+            }
+		}
+	}
+	
 	public List<T> query(String sql,List<Object> args){
 		PreparedStatement ps = null;
 		ResultSet rs = null;
