@@ -1,9 +1,7 @@
 package haoframe.core.db.sql;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -15,10 +13,6 @@ import java.util.Map;
 public class Page<T> implements Serializable{
 
 	private static final long serialVersionUID = -2513132642456114868L;
-	
-	
-	public Page() {};
-	
 	/**
 	 * 
 	 * @param pageIndex  页数
@@ -47,21 +41,8 @@ public class Page<T> implements Serializable{
 	/** 总页数 **/
 	protected long pageCount;
 	
-	
 	private List<T> items;
 	
-	/** 排序的字段 **/
-	private Map<String,String> order = new HashMap<String, String>();
-	
-	
-	public Map<String, String> getOrder() {
-		return order;
-	}
-
-	public void setOrder(Map<String, String> order) {
-		this.order = order;
-	}
-
 	public void setPageCount(long pageCount) {
 		this.pageCount = pageCount;
 	}

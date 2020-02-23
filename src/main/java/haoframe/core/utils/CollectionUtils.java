@@ -1,6 +1,7 @@
 package haoframe.core.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,7 +15,13 @@ public class CollectionUtils {
 		return array;
 	}
 
-	
+	public static boolean isNotEmpty(Collection<?> coll) {
+		 return !isEmpty(coll);
+	}
+
+	public static boolean isEmpty(Collection<?> coll) {
+        return (coll == null || coll.isEmpty());
+    }
 	
 	
 }

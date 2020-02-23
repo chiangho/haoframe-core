@@ -161,5 +161,12 @@ public class Table  {
 		}
 		return false;
 	}
+
+	public String getColumnName(String fieldName) {
+		if(this.columnMap.containsKey(fieldName)) {
+			return columnMap.get(fieldName).getName();
+		}
+		return null;
+	}
 	 
 }
