@@ -1,6 +1,7 @@
 package haoframe.core.db.sql;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -10,7 +11,7 @@ import java.util.List;
  * @param <T>
  *
  */
-public class Page<T> implements Serializable{
+public class Page<T> extends ArrayList<T> implements Serializable{
 
 	private static final long serialVersionUID = -2513132642456114868L;
 	/**

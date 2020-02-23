@@ -117,7 +117,13 @@ public class MybatisSqlSource implements SqlSource{
 	private String queryPageList(Object parameterObject) {
 		Map<String,Object> params = (Map<String, Object>) parameterObject;
 		SqlWrapper sqlWrapper = (SqlWrapper) params.get("param3");
-		return queryList(sqlWrapper);
+		StringBuffer sb = new StringBuffer();
+		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
+		String sql = sqlWrapper.getMybatisSql("sqlWrapper",this.table);
+		if(StringUtils.isNotEmpty(sql)) {
+			sb.append(" where "+sql);
+		}
+		return sb.toString();
 	}
 	
 	private String queryBean(SqlWrapper conditions) {
