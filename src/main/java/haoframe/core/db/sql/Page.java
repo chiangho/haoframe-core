@@ -1,6 +1,7 @@
-package haoframe.core.mybatis.plugins;
+package haoframe.core.db.sql;
 
 import java.io.Serializable;
+import java.util.List;
 
 
 /**
@@ -9,7 +10,7 @@ import java.io.Serializable;
  * @param <T>
  *
  */
-public class Page implements Serializable{
+public class Page<T> implements Serializable{
 
 	private static final long serialVersionUID = -2513132642456114868L;
 	/**
@@ -22,6 +23,7 @@ public class Page implements Serializable{
 		this.pageSize = pageSize;
 	}
 	
+	List<T> items;
 	
 	/** 从第几条记录开始 **/
 	protected int offset;
@@ -81,5 +83,14 @@ public class Page implements Serializable{
 		this.pageIndex = pageIndex;
 	}
 
+	public List<T> getItems() {
+		return items;
+	}
+
+	public void setItems(List<T> items) {
+		this.items = items;
+	}
+
+	
 	
 }

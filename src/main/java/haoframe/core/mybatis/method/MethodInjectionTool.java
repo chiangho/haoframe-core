@@ -95,7 +95,7 @@ public class MethodInjectionTool {
 		switch(md) {
 		case queryPageList:
 		case queryList:
-		case queryBean:
+		case queryOne:
 			returnType=tableClass;
 		default:
 			break;

@@ -20,12 +20,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import haoframe.core.db.model.Table;
+import haoframe.core.db.sql.Page;
 import haoframe.core.db.sql.ResultMapTool;
 import haoframe.core.db.sql.Sql;
 import haoframe.core.db.sql.SqlGenTool;
 import haoframe.core.exception.ErrorInfo;
 import haoframe.core.exception.HaoException;
-import haoframe.core.mybatis.plugins.Page;
 import haoframe.core.utils.ClassUtils;
 
 

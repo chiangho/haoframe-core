@@ -12,7 +12,7 @@ public enum BaseMapperMethodDefinition{
 	queryObject("queryObject",SqlCommandType.SELECT,null,Object.class),
 	queryPageList("queryPageList",SqlCommandType.SELECT,null,null),
 	queryList("queryList",SqlCommandType.SELECT,null,null),
-	queryBean("queryBean",SqlCommandType.SELECT,null,null),
+	queryOne("queryOne",SqlCommandType.SELECT,null,null),
 	delete("delete",SqlCommandType.DELETE,null,null),
 	update("update",SqlCommandType.UPDATE,null,null),
 	insert("insert",SqlCommandType.INSERT,null,Integer.class),

@@ -72,7 +72,7 @@ public class MybatisSqlSource implements SqlSource{
 		case update:
 			sql = getUpdate(parameterObject);
 			break;
-		case queryBean:
+		case queryOne:
 			sql = queryBean((SqlWrapper) parameterObject);
 			break;
 		case queryPageList:
