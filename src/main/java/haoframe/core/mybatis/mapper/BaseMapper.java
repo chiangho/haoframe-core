@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import haoframe.core.db.sql.Page;
-import haoframe.core.db.sql.SqlWrapper;
+import haoframe.core.mybatis.plugins.Page;
+import haoframe.core.mybatis.sql.SqlWrapper;
 
 public interface BaseMapper<T>  {
 
@@ -20,7 +20,7 @@ public interface BaseMapper<T>  {
 	
 	public List<T> queryList(SqlWrapper conditions);
 	
-	public Page<T> queryPageList(@Param("pageSize")int pageSize,@Param("pageIndex")int pageIndex,@Param("sqlWrapper") SqlWrapper sqlWrapper);
+	public List<T> queryPageList(@Param("page")Page<T> page,@Param("sqlWrapper") SqlWrapper sqlWrapper);
 	
 	public Object queryObject(SqlWrapper conditions);
 	

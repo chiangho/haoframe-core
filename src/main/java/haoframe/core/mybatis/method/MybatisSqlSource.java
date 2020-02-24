@@ -1,5 +1,6 @@
 package haoframe.core.mybatis.method;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import haoframe.core.db.model.Column;
 import haoframe.core.db.model.Table;
-import haoframe.core.db.sql.SqlWrapper;
+import haoframe.core.mybatis.sql.SqlWhere;
+import haoframe.core.mybatis.sql.SqlWrapper;
+import haoframe.core.mybatis.sql.db_enum.SqlConnector;
 import haoframe.core.utils.ClassUtils;
 
 public class MybatisSqlSource implements SqlSource{
@@ -106,7 +109,7 @@ public class MybatisSqlSource implements SqlSource{
 		StringBuffer sb = new StringBuffer();
 		String fieldName = fieldNames[0];
 		sb.append("select `"+table.getColumnName(fieldName)+"` from `"+this.table.getTableName()+"` ");
-		String whereSql = conditions.getMybatisSql("",this.table);
+		String whereSql = sqlWrapperToSqlAsMysql("",conditions);
 		if(StringUtils.isNotEmpty(whereSql)) {
 			sb.append(" where "+whereSql);
 		}
@@ -116,10 +119,10 @@ public class MybatisSqlSource implements SqlSource{
 	@SuppressWarnings("unchecked")
 	private String queryPageList(Object parameterObject) {
 		Map<String,Object> params = (Map<String, Object>) parameterObject;
-		SqlWrapper sqlWrapper = (SqlWrapper) params.get("param3");
+		SqlWrapper sqlWrapper = (SqlWrapper) params.get("param2");
 		StringBuffer sb = new StringBuffer();
 		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
-		String sql = sqlWrapper.getMybatisSql("sqlWrapper",this.table);
+		String sql = sqlWrapperToSqlAsMysql("sqlWrapper",sqlWrapper);
 		if(StringUtils.isNotEmpty(sql)) {
 			sb.append(" where "+sql);
 		}
@@ -129,7 +132,7 @@ public class MybatisSqlSource implements SqlSource{
 	private String queryBean(SqlWrapper conditions) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
-		String whereSql = conditions.getMybatisSql("",this.table);
+		String whereSql = this.sqlWrapperToSqlAsMysql("",conditions);
 		if(StringUtils.isNotEmpty(whereSql)) {
 			sb.append(" where "+whereSql);
 		}
@@ -168,7 +171,7 @@ public class MybatisSqlSource implements SqlSource{
 			}
 			sb.append(fieldString);
 		}
-		String whereSql = sqlWrapper.getMybatisSql("sqlWrapper", table);
+		String whereSql = this.sqlWrapperToSqlAsMysql("sqlWrapper", sqlWrapper);
 		if(StringUtils.isNotBlank(whereSql)) {
 			sb.append(" where "+whereSql);
 		}
@@ -192,7 +195,7 @@ public class MybatisSqlSource implements SqlSource{
 	private String queryList(SqlWrapper condition) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
-		String sql = condition.getMybatisSql("",this.table);
+		String sql = sqlWrapperToSqlAsMysql("",condition);
 		if(StringUtils.isNotEmpty(sql)) {
 			sb.append(" where "+sql);
 		}
@@ -202,7 +205,7 @@ public class MybatisSqlSource implements SqlSource{
 	private String getDelete(SqlWrapper condition) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("delete from `"+table.getTableName()+"` ");
-		String whereSql = condition.getMybatisSql("", table);
+		String whereSql = sqlWrapperToSqlAsMysql("", condition);
 		if(StringUtils.isNotEmpty(whereSql)) {
 			sb.append(" where "+whereSql);
 		}
@@ -236,4 +239,129 @@ public class MybatisSqlSource implements SqlSource{
 		}
 		return sb.toString();
 	}
+	
+	
+	public String sqlWrapperToSqlAsMysql(String prefix,SqlWrapper sqlWrapper) {
+		List<SqlWhere> sqlWhereList = sqlWrapper.getSqlWhereList();
+		if(sqlWhereList==null||sqlWhereList.isEmpty()) {
+			return "";
+		}
+		if(StringUtils.isNotEmpty(prefix)) {
+			prefix=prefix+".params";
+		}else {
+			prefix="params";
+		}
+		StringBuffer sb = new StringBuffer();
+		int count=0;
+		for(int i=0;i<sqlWhereList.size();i++) {
+			SqlWhere sqlWhere = sqlWhereList.get(i);
+			if(count==0&&!sqlWhere.isCondition()) {
+				continue;
+			}
+			String sql = sqlWhereToSqlAsMysql(prefix,sqlWhere);
+			sb.append(sql);
+			SqlWhere nextSqlWhere =null;
+			if((i+1)==(sqlWhereList.size()-1)) {
+				nextSqlWhere = sqlWhereList.get((i+1));
+			}
+			
+			//当前和下一个都是where条件的添加默认的and
+			if(sqlWhere.isCondition()&&nextSqlWhere!=null&&nextSqlWhere.isCondition()) {
+				sb.append(" "+SqlConnector.and.getConnector()+" ");
+			}
+			count++;
+		}
+		
+		
+		//将无效的后缀截取掉
+		String sql = sb.toString().trim();
+		if(sql.toUpperCase().endsWith(SqlConnector.and.getConnector())) {
+			sql  = sql.substring(0,sql.length()-SqlConnector.and.getConnector().length());
+		}
+		if(sql.toUpperCase().endsWith(SqlConnector.or.getConnector())) {
+			sql  = sql.substring(0,sql.length()-SqlConnector.or.getConnector().length());
+		}
+		if(sql.toUpperCase().endsWith(SqlConnector.orStart.getConnector())) {
+			sql  = sql.substring(0,sql.length()-SqlConnector.orStart.getConnector().length());
+		}
+		if(sql.toUpperCase().endsWith(SqlConnector.andStart.getConnector())) {
+			sql  = sql.substring(0,sql.length()-SqlConnector.andStart.getConnector().length());
+		}
+		
+		return sql;
+	}
+	
+	
+	public String sqlWhereToSqlAsMysql(String prefix,SqlWhere sqlWhere) {
+		StringBuffer sb = new StringBuffer();
+		String fieldName = sqlWhere.getFieldName();
+		sb.append(" `"+this.table.getColumnName(fieldName)+"`");
+		if(StringUtils.isNotBlank(prefix)) {
+			prefix =prefix+".";
+		}
+		switch (sqlWhere.getOperators()) {
+		case in:
+			sb.append(" in( ");
+			Object[] values1=(Object[]) sqlWhere.getValue();
+			for (int j = 0; j < values1.length; j++) {
+				if (j == 0) {
+					sb.append("#{"+prefix+fieldName+"[0]}");
+				} else {
+					sb.append(",#{"+prefix+fieldName+"[1]}");
+				}
+			}
+			sb.append(") ");
+			break;
+		case not_in:
+			sb.append(" not in( ");
+			Object[] values2=(Object[]) sqlWhere.getValue();
+			for (int j = 0; j < values2.length; j++) {
+				if (j == 0) {
+					sb.append("#{"+prefix+fieldName+"[0]}");
+				} else {
+					sb.append(",#{"+prefix+fieldName+"[1]}");
+				}
+			}
+			sb.append(") ");
+			break;
+		case between:
+			sb.append(" between #{"+prefix+fieldName+"[0]} and #{params."+fieldName+"[1]} ");
+			break;
+		case not_between:
+			sb.append(" not between #{"+prefix+fieldName+"[0]} and #{params."+fieldName+"[1]} ");
+			break;
+		case like:
+			sb.append(" like concat('%',#{"+prefix+fieldName+"},'%') ");
+			break;
+		case front_like:
+			sb.append(" like concat('%',#{"+prefix+fieldName+"}) ");
+			break;
+		case behind_like:
+			sb.append(" like concat(#{"+prefix+fieldName+"},'%') ");
+			break;
+		case equals:
+			sb.append(" = #{"+prefix+fieldName+"} ");
+			break;
+		case not_equals:
+			sb.append(" != #{"+prefix+fieldName+"} ");
+			break;
+		case greater:
+			sb.append(" > #{"+prefix+fieldName+"} ");
+			break;
+		case greater_equals:
+			sb.append(" >= #{"+prefix+fieldName+"} ");
+			break;
+		case less:
+			sb.append(" < #{"+prefix+fieldName+"} ");
+			break;
+		case less_equals:
+			sb.append(" <= #{"+prefix+fieldName+"} ");
+			break;
+		default:
+			logger.error("未找到对应的逻辑操作条件,你设置的sql信息如下{}", this);
+			break;
+		}
+		return sb.toString();
+	}
+	
 }
