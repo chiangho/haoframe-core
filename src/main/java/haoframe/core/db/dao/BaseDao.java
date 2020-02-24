@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.ibatis.session.SqlSession;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -473,20 +475,20 @@ public class BaseDao<T> {
 	
 	private String getPageSql(Page<T> page, String sql) {
 		StringBuilder sqlBuffer = new StringBuilder(sql);
-//		Map<String, String> order = page.getOrder();
-//		if (order != null && !order.isEmpty()) {
-//			sqlBuffer.append(" order by ");
-//			Set<String> keys = order.keySet();
-//			int i = 0;
-//			for (String key : keys) {
-//				if (i != keys.size() - 1) {
-//					sqlBuffer.append(key + " " + order.get(key) + ", ");
-//				} else {
-//					sqlBuffer.append(key + " " + order.get(key) + " ");
-//				}
-//				i++;
-//			}
-//		}
+		Map<String, String> order = page.getOrder();
+		if (order != null && !order.isEmpty()) {
+			sqlBuffer.append(" order by ");
+			Set<String> keys = order.keySet();
+			int i = 0;
+			for (String key : keys) {
+				if (i != keys.size() - 1) {
+					sqlBuffer.append(key + " " + order.get(key) + ", ");
+				} else {
+					sqlBuffer.append(key + " " + order.get(key) + " ");
+				}
+				i++;
+			}
+		}
 		sqlBuffer.append(" limit ").append(page.getOffset()).append(",").append(page.getPageSize());
 		return sqlBuffer.toString();
 	}
