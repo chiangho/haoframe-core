@@ -96,6 +96,10 @@ public class MethodInjectionTool {
 		case queryPageList:
 		case queryList:
 		case queryOne:
+		case queryOneByEntity:
+		case queryListByEntity:
+		case queryPageListByEntity:
+		case queryOneByCode:
 			returnType=tableClass;
 		default:
 			break;

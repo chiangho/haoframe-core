@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import haoframe.core.mybatis.plugins.Page;
+import haoframe.core.mybatis.plugins.Paging;
 import haoframe.core.mybatis.sql.SqlOrder;
 import haoframe.core.mybatis.sql.SqlWrapper;
 
@@ -15,15 +15,15 @@ public interface BaseMapper<T>  {
 	
 	public void update(@Param("bean")T bean,@Param("sqlWrapper") SqlWrapper sqlWrapper);
 	
-	public void delete(SqlWrapper conditions);
+	public void delete(SqlWrapper sqlWrapper);
 	
-	public T queryOne(SqlWrapper conditions);
+	public T queryOne(SqlWrapper sqlWrapper);
 	
-	public List<T> queryList(SqlWrapper conditions);
+	public List<T> queryList(SqlWrapper sqlWrapper);
 	
-	public List<T> queryPageList(@Param("page")Page page,@Param("sqlWrapper") SqlWrapper sqlWrapper);
+	public List<T> queryPageList(@Param("page")Paging paging,@Param("sqlWrapper") SqlWrapper sqlWrapper);
 	
-	public Object queryObject(SqlWrapper conditions);
+	public Object queryObject(SqlWrapper sqlWrapper);
 	
 	//register end 基本方法
 	
@@ -36,16 +36,15 @@ public interface BaseMapper<T>  {
 	
 	public List<T> queryListByEntity(@Param("where") T where,@Param("order") SqlOrder order);
 	
-	public List<T> queryPageListByEntity(@Param("page")Page page,@Param("where") T where,@Param("order") SqlOrder order);
+	public List<T> queryPageListByEntity(@Param("page")Paging paging,@Param("where") T where,@Param("order") SqlOrder order);
 	
-	public Object queryObjectByEntity(String fieldName,T bean);
+	public Object queryObjectByEntity(@Param("fieldName") String fieldName,@Param("where") T bean);
 	//register end 基于实体操作
-	
 	
 	//register start 基于主键CODE操作
 	public void deleteByCode(Object code);
 	
-	public T queryBeanByCode(Object code);
+	public void updateByCode(@Param("bean") T bean,@Param("code") Object code);
 	
 	public T queryOneByCode(Object code);
 	//register end 基于主键CODE操作

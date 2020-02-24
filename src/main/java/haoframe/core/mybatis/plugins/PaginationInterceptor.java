@@ -24,22 +24,19 @@ import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import haoframe.core.mybatis.sql.SqlWrapper;
-
 @Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = { Connection.class, Integer.class }) })
 public class PaginationInterceptor implements Interceptor {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	
-	@SuppressWarnings("rawtypes")
 	@Override
 	public Object intercept(Invocation invocation) throws Exception  {
 		StatementHandler statementHandler = realTarget(invocation.getTarget());
 		MetaObject metaStatementHandler = SystemMetaObject.forObject(statementHandler);  
 		MappedStatement mappedStatement=(MappedStatement) metaStatementHandler.getValue("delegate.mappedStatement");
 		BoundSql boundSql = statementHandler.getBoundSql();
-		Page page = isPageFuncton(mappedStatement,boundSql);
-		if(page!=null) {
+		Paging paging = isPageFuncton(mappedStatement,boundSql);
+		if(paging!=null) {
 			//查询total,替换分页语句
 			Connection connection = (Connection)invocation.getArgs()[0];
 			String originalSql = boundSql.getSql();
@@ -81,8 +78,8 @@ public class PaginationInterceptor implements Interceptor {
 			if(total==0) {
 				return null;
 			}
-			page.setTotalRows(total);
-			String sql = originalSql + " LIMIT "+page.getOffset()+","+page.getPageSize();
+			paging.setTotalRows(total);
+			String sql = originalSql + " LIMIT "+paging.getOffset()+","+paging.getPageSize();
 			metaStatementHandler.setValue("delegate.boundSql.sql", sql);
 		}
 		return invocation.proceed();
@@ -103,31 +100,29 @@ public class PaginationInterceptor implements Interceptor {
 	}
 
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Page isPageFuncton(MappedStatement mappedStatement,BoundSql boundSql) {
+	@SuppressWarnings({ "unchecked"})
+	private Paging isPageFuncton(MappedStatement mappedStatement,BoundSql boundSql) {
 		//非查询方法直接排除
 		if (SqlCommandType.SELECT != mappedStatement.getSqlCommandType()
 	            || StatementType.CALLABLE == mappedStatement.getStatementType()) {
 	           return null;
 	    }
-		//条件1  id 是queryPageList  有参数 page(Page)  sqlWrapper（SqlWrapper）
+		//条件 是query  有参数 page(Page)  
 		Object paramObject  = boundSql.getParameterObject();
 		if(!Map.class.isAssignableFrom(paramObject.getClass())) {
 			return null;
 		}
 		
 		Map<String,Object> paramObjectMap = (Map<String, Object>) paramObject;
-		if(!paramObjectMap.containsKey("page")||!paramObjectMap.containsKey("sqlWrapper")) {
+		if(!paramObjectMap.containsKey("page")) {
 			return null;
 		}
 		
 		Object _page = paramObjectMap.get("page");
-		Object sqlWrapper = paramObjectMap.get("sqlWrapper");
-		
-		if(!(_page instanceof Page)||!(sqlWrapper instanceof SqlWrapper)) {
+		if(!(_page instanceof Paging)) {
 			return null;
 		}
-		return (Page) _page;
+		return (Paging) _page;
 	}
 	
 	

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import haoframe.core.db.model.Column;
 import haoframe.core.db.model.Table;
 import haoframe.core.mybatis.sql.SqlCondition;
+import haoframe.core.mybatis.sql.SqlOrder;
 import haoframe.core.mybatis.sql.SqlWrapper;
 import haoframe.core.mybatis.sql.db_enum.SqlConnector;
 import haoframe.core.utils.ClassUtils;
@@ -64,25 +65,52 @@ public class MybatisSqlSource implements SqlSource{
 		String sql="";
 		switch(method) {
 		case insert:
-			sql = getInsert(parameterObject);
+			sql = getInsertSql(parameterObject);
 			break;
 		case delete:
-			sql = getDelete((SqlWrapper) parameterObject);
+			sql = getDeleteSql((SqlWrapper) parameterObject);
 			break;
 		case update:
-			sql = getUpdate(parameterObject);
+			sql = getUpdateSql(parameterObject);
 			break;
 		case queryOne:
-			sql = queryBean((SqlWrapper) parameterObject);
+			sql = getQueryBeanSql((SqlWrapper) parameterObject);
 			break;
 		case queryPageList:
-			sql = queryPageList(parameterObject);
+			sql = getQueryPageListSql(parameterObject);
 			break;
 		case queryList:
-			sql = queryList((SqlWrapper) parameterObject);
+			sql = getQueryListSql((SqlWrapper) parameterObject);
 			break;
 		case queryObject:
-			sql = queryObject((SqlWrapper) parameterObject);
+			sql = getQueryObjectSql((SqlWrapper) parameterObject);
+			break;
+		case updateByEntity:	
+			sql=getUpdateByEntitySql(parameterObject);
+			break;
+		case deleteByEntity:	
+			sql=getDeleteByEntitySql(parameterObject);
+			break;
+		case queryOneByEntity:	
+			sql=getQueryOneByEntitySql(parameterObject);
+			break;
+		case queryListByEntity:	
+			sql=getQueryListByEntitySql(parameterObject);
+			break;
+		case queryPageListByEntity:	
+			sql=getQueryPageListByEntitySql(parameterObject);
+			break;
+		case queryObjectByEntity:	
+			sql=getQueryObjectByEntitySql(parameterObject);
+			break;
+		case deleteByCode:	
+			sql=getDeleteByCodeSql(parameterObject);
+			break;
+		case updateByCode:	
+			sql=getUpdateByCodeSql(parameterObject);
+			break;
+		case queryOneByCode:	
+			sql=getQueryOneByCodeSql(parameterObject);
 			break;
 		default:
 			break;
@@ -101,82 +129,66 @@ public class MybatisSqlSource implements SqlSource{
 	    return boundSql;
 	}
 	
-	private String queryObject(SqlWrapper conditions) {
-		String[] fieldNames = conditions.getFieldNames();
-		if(fieldNames!=null&&fieldNames.length==1) {
-			return "";
-		}
+	
+	//register begin 生成sql的工具方法
+	String getOrderSql(SqlOrder sqlOrder) {
 		StringBuffer sb = new StringBuffer();
-		String fieldName = fieldNames[0];
-		sb.append("select `"+table.getColumnName(fieldName)+"` from `"+this.table.getTableName()+"` ");
-		String whereSql = sqlWrapperToSqlAsMysql("",conditions);
+		if(sqlOrder!=null&&sqlOrder.getOrderby().size()>0) {
+			int i=0;
+			for(String[] item:sqlOrder.getOrderby()) {
+				if(i==0) {
+					sb.append(table.getColumnName(item[0])+" "+item[1]);
+				}else {
+					sb.append(","+table.getColumnName(item[0])+" "+item[1]);
+				}
+				i++;
+			}
+		}
+		return sb.toString();
+	}
+	
+	private String getQuerySqlByEntity(Object where,SqlOrder order ) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getQuerySqlByEntity("where",where));
+		String orderSql = getOrderSql(order);
+		if(StringUtils.isNotEmpty(orderSql)) {
+			sb.append(" order by "+orderSql);
+		}
+		return sb.toString();
+	}
+	
+	private String getQuerySqlByEntity(String prefix,Object where) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
+		String whereSql = getWhereSqlByEntity(prefix,where);
 		if(StringUtils.isNotEmpty(whereSql)) {
 			sb.append(" where "+whereSql);
 		}
 		return sb.toString();
 	}
 	
-	@SuppressWarnings("unchecked")
-	private String queryPageList(Object parameterObject) {
-		Map<String,Object> params = (Map<String, Object>) parameterObject;
-		SqlWrapper sqlWrapper = (SqlWrapper) params.get("param2");
-		StringBuffer sb = new StringBuffer();
-		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
-		String sql = sqlWrapperToSqlAsMysql("sqlWrapper",sqlWrapper);
-		if(StringUtils.isNotEmpty(sql)) {
-			sb.append(" where "+sql);
+	private String getWhereSqlByEntity(String prefix,Object bean) {
+		if(StringUtils.isNotEmpty(prefix)) {
+			prefix = prefix+".";
 		}
-		return sb.toString();
-	}
-	
-	private String queryBean(SqlWrapper conditions) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
-		String whereSql = this.sqlWrapperToSqlAsMysql("",conditions);
-		if(StringUtils.isNotEmpty(whereSql)) {
-			sb.append(" where "+whereSql);
-		}
-		return sb.toString();
-	}
-	
-	@SuppressWarnings("unchecked")
-	private String getUpdate(Object parameterObject) {
-		Map<String,Object> params = (Map<String, Object>) parameterObject;
-		Object bean = params.get("param1");
-		SqlWrapper sqlWrapper = (SqlWrapper) params.get("param2");
-		if(bean==null) {
-			return "";
-		}
-		StringBuffer sb = new StringBuffer();
-		sb.append("update `"+table.getTableName()+"` ");
-		int fieldSize = 0;
+		StringBuffer where = new StringBuffer();
 		if(bean!=null) {
-			StringBuffer fieldString = new StringBuffer();
-			int index= 0;
+			int index=0;
 			for(String fieldName:table.getColumnMap().keySet()) {
 				Object value = ClassUtils.getFieldValue(bean, fieldName); 
 				if(value!=null) {
 					Column c = table.getColumnInfo(fieldName);
 					if(index==0) {
-						fieldString.append("set `"+c.getName()+"` = #{bean."+fieldName+"}");
+						where.append(" `"+c.getName()+"`=#{"+prefix+fieldName+"}");
 					}else {
-						fieldString.append(",`"+c.getName()+"`=#{bean."+fieldName+"}");
+						where.append(" and `"+c.getName()+"`=#{"+prefix+fieldName+"}");
 					}
 					index++;
-					fieldSize++;
 				}
 			}
-			if(fieldSize==0) {
-				return null;
-			}
-			sb.append(fieldString);
 		}
-		String whereSql = this.sqlWrapperToSqlAsMysql("sqlWrapper", sqlWrapper);
-		if(StringUtils.isNotBlank(whereSql)) {
-			sb.append(" where "+whereSql);
-		}
-		return sb.toString();
-	} 
+		return where.toString();
+	}
 	
 	private String getSelectFiled() {
 		StringBuffer sb = new StringBuffer();
@@ -191,55 +203,6 @@ public class MybatisSqlSource implements SqlSource{
 		}
 		return sb.toString();
 	}
-	
-	private String queryList(SqlWrapper condition) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
-		String sql = sqlWrapperToSqlAsMysql("",condition);
-		if(StringUtils.isNotEmpty(sql)) {
-			sb.append(" where "+sql);
-		}
-		return sb.toString();
-	}
-
-	private String getDelete(SqlWrapper condition) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("delete from `"+table.getTableName()+"` ");
-		String whereSql = sqlWrapperToSqlAsMysql("", condition);
-		if(StringUtils.isNotEmpty(whereSql)) {
-			sb.append(" where "+whereSql);
-		}
-		return sb.toString();
-	}
-	
-	private String getInsert(Object bean) {
-		if(bean==null) {
-			return "";
-		}
-		StringBuffer sb = new StringBuffer();
-		StringBuffer fields = new StringBuffer();
-		StringBuffer values = new StringBuffer();
-		int index=0;
-		for(String fieldName:table.getColumnMap().keySet()) {
-			Object value = ClassUtils.getFieldValue(bean, fieldName); 
-			if(value!=null) {
-				Column c = table.getColumnInfo(fieldName);
-				if(index==0) {
-					fields.append("`"+c.getName()+"`");
-					values.append("#{"+fieldName+"}");
-				}else {
-					fields.append(",`"+c.getName()+"`");
-					values.append(",#{"+fieldName+"}");
-				}
-				index++;
-			}
-		}
-		if(index>0) {
-			sb.append("insert into `"+table.getTableName()+"`("+fields+")values("+values+")");
-		}
-		return sb.toString();
-	}
-	
 	
 	public String sqlWrapperToSqlAsMysql(String prefix,SqlWrapper sqlWrapper) {
 		List<SqlCondition> sqlWhereList = sqlWrapper.getSqlWhereList();
@@ -271,8 +234,6 @@ public class MybatisSqlSource implements SqlSource{
 			}
 			count++;
 		}
-		
-		
 		//将无效的后缀截取掉
 		String sql = sb.toString().trim();
 		if(sql.toUpperCase().endsWith(SqlConnector.and.getConnector())) {
@@ -287,7 +248,6 @@ public class MybatisSqlSource implements SqlSource{
 		if(sql.toUpperCase().endsWith(SqlConnector.andStart.getConnector())) {
 			sql  = sql.substring(0,sql.length()-SqlConnector.andStart.getConnector().length());
 		}
-		
 		return sql;
 	}
 	
@@ -360,6 +320,259 @@ public class MybatisSqlSource implements SqlSource{
 		default:
 			logger.error("未找到对应的逻辑操作条件,你设置的sql信息如下{}", this);
 			break;
+		}
+		return sb.toString();
+	}
+	
+	private String getUpdateField(String prefix,Object bean) {
+		StringBuffer fieldString = new StringBuffer();
+		if(StringUtils.isNotEmpty(prefix)) {
+			prefix = prefix+".";
+		}
+		if(bean!=null) {
+			int index= 0;
+			for(String fieldName:table.getColumnMap().keySet()) {
+				Object value = ClassUtils.getFieldValue(bean, fieldName); 
+				if(value!=null) {
+					Column c = table.getColumnInfo(fieldName);
+					if(index==0) {
+						fieldString.append(" `"+c.getName()+"` = #{"+prefix+fieldName+"}");
+					}else {
+						fieldString.append(",`"+c.getName()+"`= #{"+prefix+fieldName+"}");
+					}
+					index++;
+				}
+			}
+		}
+		return fieldString.toString();
+	}
+	
+	
+	private String getSelectOneFiled(String fieldName) {
+		String columnName  = table.getColumnName(fieldName);
+		if(StringUtils.isNotEmpty(columnName)) {
+			fieldName = "`"+columnName+'`';
+		}
+		return fieldName;
+	}
+	//register end 生成sql的工具方法
+	
+	
+	private String getQueryOneByCodeSql(Object parameterObject) {
+		if(!table.hasColumn("code")) {
+			logger.error("表"+this.table.getTableName()+"中code字段不存在");
+			return "";
+		}
+		StringBuffer sb = new StringBuffer();
+		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` where `code`=#{code} ");
+		return sb.toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String getUpdateByCodeSql(Object parameterObject) {
+		if(!table.hasColumn("code")) {
+			logger.error("表"+this.table.getTableName()+"中code字段不存在");
+			return "";
+		}
+		Map<String,Object> params = (Map<String, Object>) parameterObject;
+		Object bean = params.get("param1");
+		String fieldString  = getUpdateField("bean",bean);
+		if(StringUtils.isEmpty(fieldString)) {
+			logger.error("更新"+this.table.getTableName()+"表时没有可更新的字段");
+			return "";
+		}
+		StringBuffer sb = new StringBuffer();
+		sb.append("update `"+table.getTableName()+"` set "+fieldString+" where `code`=#{code}");
+		return sb.toString();
+	}
+	
+	private String getDeleteByCodeSql(Object parameterObject) {
+		if(!table.hasColumn("code")) {
+			logger.error("表"+this.table.getTableName()+"中code字段不存在");
+			return "";
+		}
+		String sql = "delete from `"+table.getTableName()+"` where `code`=#{code}";
+		return sql;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String getQueryObjectByEntitySql(Object parameterObject) {
+		Map<String,Object> params = (Map<String, Object>) parameterObject;
+		String fieldName = (String) params.get("param1");
+		if(StringUtils.isEmpty(fieldName)) {
+			logger.error("查询"+this.table.getTableName()+"表时，select #字段 from。 #字段为空 ");
+			return "";
+		}
+		Object where = params.get("param2");
+		StringBuffer sb = new StringBuffer();
+		
+		sb.append("select "+getSelectOneFiled(fieldName)+" from `"+this.table.getTableName()+"` ");
+		String whereSql = getWhereSqlByEntity("where",where);
+		if(StringUtils.isNotEmpty(whereSql)) {
+			sb.append(" where "+whereSql);
+		}
+		return sb.toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String getQueryPageListByEntitySql(Object parameterObject) {
+		Map<String,Object> params = (Map<String, Object>) parameterObject;
+		Object where = params.get("param2");
+		SqlOrder order = (SqlOrder) params.get("param3");
+		return getQuerySqlByEntity(where,order);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String getQueryListByEntitySql(Object parameterObject) {
+		Map<String,Object> params = (Map<String, Object>) parameterObject;
+		Object where = params.get("param1");
+		SqlOrder order = (SqlOrder) params.get("param2");
+		return getQuerySqlByEntity(where,order);
+	}
+	
+	private String getQueryOneByEntitySql(Object parameterObject) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
+		String whereSql = getWhereSqlByEntity("",parameterObject);
+		if(StringUtils.isNotEmpty(whereSql)) {
+			sb.append(" where "+whereSql);
+		}
+		return sb.toString();
+	}
+	
+	private String getDeleteByEntitySql(Object where) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("delete from `"+table.getTableName()+"` ");
+		String whereSql = getWhereSqlByEntity("",where);
+		if(StringUtils.isNotEmpty(whereSql)) {
+			sb.append(" where "+whereSql);
+		}
+		return sb.toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String getUpdateByEntitySql(Object parameterObject) {
+		Map<String,Object> params = (Map<String, Object>) parameterObject;
+		Object bean = params.get("param1");
+		Object where = params.get("param2");
+		String fieldString  = getUpdateField("bean",bean);
+		if(StringUtils.isEmpty(fieldString)) {
+			logger.error("更新"+this.table.getTableName()+"表时没有可更新的字段");
+			return "";
+		}
+		StringBuffer sb = new StringBuffer();
+		sb.append("update `"+table.getTableName()+"` set "+fieldString);
+		String whereSql = getWhereSqlByEntity("where",where);
+		if(StringUtils.isNotEmpty(whereSql)) {
+			sb.append(" where "+whereSql);
+		}
+		return sb.toString();
+	}
+	
+	private String getQueryObjectSql(SqlWrapper conditions) {
+		String[] fieldNames = conditions.getFieldNames();
+		if(fieldNames==null||fieldNames.length==0) {
+			logger.error("查询"+this.table.getTableName()+"表时，select #字段 from。 #字段为空 ");
+			return "";
+		}
+		StringBuffer sb = new StringBuffer();
+		String fieldName = fieldNames[0];
+		sb.append("select "+getSelectOneFiled(fieldName)+" from `"+this.table.getTableName()+"` ");
+		String whereSql = sqlWrapperToSqlAsMysql("",conditions);
+		if(StringUtils.isNotEmpty(whereSql)) {
+			sb.append(" where "+whereSql);
+		}
+		return sb.toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String getQueryPageListSql(Object parameterObject) {
+		Map<String,Object> params = (Map<String, Object>) parameterObject;
+		SqlWrapper sqlWrapper = (SqlWrapper) params.get("param2");
+		StringBuffer sb = new StringBuffer();
+		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
+		String sql = sqlWrapperToSqlAsMysql("sqlWrapper",sqlWrapper);
+		if(StringUtils.isNotEmpty(sql)) {
+			sb.append(" where "+sql);
+		}
+		return sb.toString();
+	}
+	
+	private String getQueryBeanSql(SqlWrapper conditions) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
+		String whereSql = this.sqlWrapperToSqlAsMysql("",conditions);
+		if(StringUtils.isNotEmpty(whereSql)) {
+			sb.append(" where "+whereSql);
+		}
+		return sb.toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String getUpdateSql(Object parameterObject) {
+		Map<String,Object> params = (Map<String, Object>) parameterObject;
+		Object bean = params.get("param1");
+		
+		String fieldString  = getUpdateField("bean",bean);
+		if(StringUtils.isEmpty(fieldString)) {
+			logger.error("更新"+this.table.getTableName()+"表时没有可更新的字段");
+			return "";
+		}
+		StringBuffer sb = new StringBuffer("update `"+table.getTableName()+"` set "+fieldString);
+		SqlWrapper sqlWrapper = (SqlWrapper) params.get("param2");
+		String whereSql = this.sqlWrapperToSqlAsMysql("sqlWrapper", sqlWrapper);
+		if(StringUtils.isNotBlank(whereSql)) {
+			sb.append(" where "+whereSql);
+		}
+		return sb.toString();
+	} 
+	
+	
+	private String getQueryListSql(SqlWrapper condition) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
+		String sql = sqlWrapperToSqlAsMysql("",condition);
+		if(StringUtils.isNotEmpty(sql)) {
+			sb.append(" where "+sql);
+		}
+		return sb.toString();
+	}
+
+	private String getDeleteSql(SqlWrapper condition) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("delete from `"+table.getTableName()+"` ");
+		String whereSql = sqlWrapperToSqlAsMysql("", condition);
+		if(StringUtils.isNotEmpty(whereSql)) {
+			sb.append(" where "+whereSql);
+		}
+		return sb.toString();
+	}
+	
+	private String getInsertSql(Object bean) {
+		if(bean==null) {
+			logger.error("insert"+this.table.getTableName()+"表时，entity为空 ");
+			return "";
+		}
+		StringBuffer sb = new StringBuffer();
+		StringBuffer fields = new StringBuffer();
+		StringBuffer values = new StringBuffer();
+		int index=0;
+		for(String fieldName:table.getColumnMap().keySet()) {
+			Object value = ClassUtils.getFieldValue(bean, fieldName); 
+			if(value!=null) {
+				Column c = table.getColumnInfo(fieldName);
+				if(index==0) {
+					fields.append("`"+c.getName()+"`");
+					values.append("#{"+fieldName+"}");
+				}else {
+					fields.append(",`"+c.getName()+"`");
+					values.append(",#{"+fieldName+"}");
+				}
+				index++;
+			}
+		}
+		if(index>0) {
+			sb.append("insert into `"+table.getTableName()+"`("+fields+")values("+values+")");
 		}
 		return sb.toString();
 	}

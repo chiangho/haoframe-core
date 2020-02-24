@@ -13,10 +13,23 @@ public enum BaseMapperMethodDefinition{
 	queryPageList("queryPageList",SqlCommandType.SELECT,null,null),
 	queryList("queryList",SqlCommandType.SELECT,null,null),
 	queryOne("queryOne",SqlCommandType.SELECT,null,null),
-	delete("delete",SqlCommandType.DELETE,null,null),
-	update("update",SqlCommandType.UPDATE,null,null),
+	delete("delete",SqlCommandType.DELETE,null,Integer.class),
+	update("update",SqlCommandType.UPDATE,null,Integer.class),
 	insert("insert",SqlCommandType.INSERT,null,Integer.class),
 	
+	
+	updateByEntity("updateByEntity",SqlCommandType.UPDATE,null,Integer.class),
+	deleteByEntity("deleteByEntity",SqlCommandType.DELETE,null,Integer.class),
+	queryOneByEntity("queryOneByEntity",SqlCommandType.SELECT,null,null),
+	queryListByEntity("queryListByEntity",SqlCommandType.SELECT,null,null),
+	queryPageListByEntity("queryPageListByEntity",SqlCommandType.SELECT,null,null),
+	queryObjectByEntity("queryObjectByEntity",SqlCommandType.SELECT,null,Object.class),
+	
+	
+	
+	deleteByCode("deleteByCode",SqlCommandType.DELETE,null,Integer.class),
+	updateByCode("updateByCode",SqlCommandType.UPDATE,null,Integer.class),
+	queryOneByCode("queryOneByCode",SqlCommandType.SELECT,null,null),
 	;
 
 	
