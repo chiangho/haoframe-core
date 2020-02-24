@@ -6,7 +6,7 @@ import java.util.Map;
 import haoframe.core.mybatis.sql.db_enum.SqlConnector;
 import haoframe.core.mybatis.sql.db_enum.SqlOperators;
 
-public class SqlWhere {
+public class SqlCondition {
 
 	private SqlOperators operators;
 	private Object value;
@@ -16,23 +16,23 @@ public class SqlWhere {
 	private SqlConnector connector;
 	
 	
-	public SqlWhere(String column, Object value) {
+	public SqlCondition(String column, Object value) {
 		this(column, SqlOperators.equals, value);
 	}
 	
-	public SqlWhere(String column, SqlOperators operators, Object value) {
+	public SqlCondition(String column, SqlOperators operators, Object value) {
 		this.fieldName = column;
 		this.operators = operators;
 		this.value = value;
 	}
 
-	public SqlWhere(String column, SqlOperators operators, Object[] values) {
+	public SqlCondition(String column, SqlOperators operators, Object[] values) {
 		this.fieldName = column;
 		this.operators = operators;
 		this.value = values;
 	}
 
-	public SqlWhere(SqlConnector connector) {
+	public SqlCondition(SqlConnector connector) {
 		this.connector = connector;
 		this.isCondition = false;
 	}

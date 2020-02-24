@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import haoframe.core.db.model.Column;
 import haoframe.core.db.model.Table;
-import haoframe.core.mybatis.sql.SqlWhere;
+import haoframe.core.mybatis.sql.SqlCondition;
 import haoframe.core.mybatis.sql.SqlWrapper;
 import haoframe.core.mybatis.sql.db_enum.SqlConnector;
 import haoframe.core.utils.ClassUtils;
@@ -242,7 +242,7 @@ public class MybatisSqlSource implements SqlSource{
 	
 	
 	public String sqlWrapperToSqlAsMysql(String prefix,SqlWrapper sqlWrapper) {
-		List<SqlWhere> sqlWhereList = sqlWrapper.getSqlWhereList();
+		List<SqlCondition> sqlWhereList = sqlWrapper.getSqlWhereList();
 		if(sqlWhereList==null||sqlWhereList.isEmpty()) {
 			return "";
 		}
@@ -254,19 +254,19 @@ public class MybatisSqlSource implements SqlSource{
 		StringBuffer sb = new StringBuffer();
 		int count=0;
 		for(int i=0;i<sqlWhereList.size();i++) {
-			SqlWhere sqlWhere = sqlWhereList.get(i);
-			if(count==0&&!sqlWhere.isCondition()) {
+			SqlCondition sqlCondition = sqlWhereList.get(i);
+			if(count==0&&!sqlCondition.isCondition()) {
 				continue;
 			}
-			String sql = sqlWhereToSqlAsMysql(prefix,sqlWhere);
+			String sql = sqlWhereToSqlAsMysql(prefix,sqlCondition);
 			sb.append(sql);
-			SqlWhere nextSqlWhere =null;
+			SqlCondition nextSqlWhere =null;
 			if((i+1)==(sqlWhereList.size()-1)) {
 				nextSqlWhere = sqlWhereList.get((i+1));
 			}
 			
 			//当前和下一个都是where条件的添加默认的and
-			if(sqlWhere.isCondition()&&nextSqlWhere!=null&&nextSqlWhere.isCondition()) {
+			if(sqlCondition.isCondition()&&nextSqlWhere!=null&&nextSqlWhere.isCondition()) {
 				sb.append(" "+SqlConnector.and.getConnector()+" ");
 			}
 			count++;
@@ -292,17 +292,17 @@ public class MybatisSqlSource implements SqlSource{
 	}
 	
 	
-	public String sqlWhereToSqlAsMysql(String prefix,SqlWhere sqlWhere) {
+	public String sqlWhereToSqlAsMysql(String prefix,SqlCondition sqlCondition) {
 		StringBuffer sb = new StringBuffer();
-		String fieldName = sqlWhere.getFieldName();
+		String fieldName = sqlCondition.getFieldName();
 		sb.append(" `"+this.table.getColumnName(fieldName)+"`");
 		if(StringUtils.isNotBlank(prefix)) {
 			prefix =prefix+".";
 		}
-		switch (sqlWhere.getOperators()) {
+		switch (sqlCondition.getOperators()) {
 		case in:
 			sb.append(" in( ");
-			Object[] values1=(Object[]) sqlWhere.getValue();
+			Object[] values1=(Object[]) sqlCondition.getValue();
 			for (int j = 0; j < values1.length; j++) {
 				if (j == 0) {
 					sb.append("#{"+prefix+fieldName+"[0]}");
@@ -314,7 +314,7 @@ public class MybatisSqlSource implements SqlSource{
 			break;
 		case not_in:
 			sb.append(" not in( ");
-			Object[] values2=(Object[]) sqlWhere.getValue();
+			Object[] values2=(Object[]) sqlCondition.getValue();
 			for (int j = 0; j < values2.length; j++) {
 				if (j == 0) {
 					sb.append("#{"+prefix+fieldName+"[0]}");

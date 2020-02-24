@@ -12,7 +12,7 @@ import haoframe.core.mybatis.sql.db_enum.SqlOperators;
 
 public class SqlWrapper {
 
-	List<SqlWhere> sqlWhereList;
+	List<SqlCondition> sqlWhereList;
 	
 	Set<String> fieldNames;
 	
@@ -21,7 +21,7 @@ public class SqlWrapper {
 	SqlOrder sqlOrder;
 	
 	public SqlWrapper() {
-		sqlWhereList = new ArrayList<SqlWhere>();
+		sqlWhereList = new ArrayList<SqlCondition>();
 		params = new HashMap<String,Object>();
 		fieldNames = new HashSet<>();
 		sqlOrder = new SqlOrder();
@@ -51,53 +51,53 @@ public class SqlWrapper {
 	}
 
 	public SqlWrapper addCondition(String fieldName, Object value) {
-		sqlWhereList.add(new SqlWhere(fieldName,value));
+		sqlWhereList.add(new SqlCondition(fieldName,value));
 		params.put(fieldName, value);
 		return this;
 	}
 	
 	public SqlWrapper addCondition(String fieldName, SqlOperators operators,Object value) {
-		sqlWhereList.add(new SqlWhere(fieldName,operators,value));
+		sqlWhereList.add(new SqlCondition(fieldName,operators,value));
 		params.put(fieldName, value);
 		return this;
 	}
 
 	public SqlWrapper addCondition(String fieldName, SqlOperators operators,Object[] value) {
-		sqlWhereList.add(new SqlWhere(fieldName,value));
+		sqlWhereList.add(new SqlCondition(fieldName,value));
 		params.put(fieldName, value);
 		return this;
 	}
 	
 	public SqlWrapper and() {
-		sqlWhereList.add(new SqlWhere(SqlConnector.and));
+		sqlWhereList.add(new SqlCondition(SqlConnector.and));
 		return this;
 	}
 
 	public SqlWrapper andStart() {
-		sqlWhereList.add(new SqlWhere(SqlConnector.andStart));
+		sqlWhereList.add(new SqlCondition(SqlConnector.andStart));
 		return this;
 	}
 
 	public SqlWrapper or() {
-		sqlWhereList.add(new SqlWhere(SqlConnector.or));
+		sqlWhereList.add(new SqlCondition(SqlConnector.or));
 		return this;
 	}
 
 	public SqlWrapper orStart() {
-		sqlWhereList.add(new SqlWhere(SqlConnector.orStart));
+		sqlWhereList.add(new SqlCondition(SqlConnector.orStart));
 		return this;
 	}
 
 	public SqlWrapper end() {
-		sqlWhereList.add(new SqlWhere(SqlConnector.end));
+		sqlWhereList.add(new SqlCondition(SqlConnector.end));
 		return this;
 	}
 
-	public List<SqlWhere> getSqlWhereList() {
+	public List<SqlCondition> getSqlWhereList() {
 		return sqlWhereList;
 	}
 
-	public void setSqlWhereList(List<SqlWhere> sqlWhereList) {
+	public void setSqlWhereList(List<SqlCondition> sqlWhereList) {
 		this.sqlWhereList = sqlWhereList;
 	}
 
