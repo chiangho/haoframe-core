@@ -52,16 +52,19 @@ public class SqlWrapper {
 
 	public SqlWrapper addCondition(String fieldName, Object value) {
 		sqlWhereList.add(new SqlWhere(fieldName,value));
+		params.put(fieldName, value);
 		return this;
 	}
 	
 	public SqlWrapper addCondition(String fieldName, SqlOperators operators,Object value) {
 		sqlWhereList.add(new SqlWhere(fieldName,operators,value));
+		params.put(fieldName, value);
 		return this;
 	}
 
 	public SqlWrapper addCondition(String fieldName, SqlOperators operators,Object[] value) {
 		sqlWhereList.add(new SqlWhere(fieldName,value));
+		params.put(fieldName, value);
 		return this;
 	}
 	
