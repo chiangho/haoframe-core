@@ -136,10 +136,15 @@ public class MybatisSqlSource implements SqlSource{
 		if(sqlOrder!=null&&sqlOrder.getOrderby().size()>0) {
 			int i=0;
 			for(String[] item:sqlOrder.getOrderby()) {
+				String fieldName = item[0];
+				String columnName = table.getColumnName(fieldName);
+				if(StringUtils.isNotEmpty(columnName)) {
+					fieldName = "`"+columnName+"`";
+				}
 				if(i==0) {
-					sb.append(table.getColumnName(item[0])+" "+item[1]);
+					sb.append(fieldName+" "+item[1]);
 				}else {
-					sb.append(","+table.getColumnName(item[0])+" "+item[1]);
+					sb.append(","+fieldName+" "+item[1]);
 				}
 				i++;
 			}
@@ -495,6 +500,10 @@ public class MybatisSqlSource implements SqlSource{
 		if(StringUtils.isNotEmpty(sql)) {
 			sb.append(" where "+sql);
 		}
+		String order = this.getOrderSql(sqlWrapper.getSqlOrder());
+		if(StringUtils.isNotEmpty(order)) {
+			sb.append(" order by "+order);
+		}
 		return sb.toString();
 	}
 	
@@ -528,12 +537,16 @@ public class MybatisSqlSource implements SqlSource{
 	} 
 	
 	
-	private String getQueryListSql(SqlWrapper condition) {
+	private String getQueryListSql(SqlWrapper sqlWrapper) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("select "+getSelectFiled()+" from `"+this.table.getTableName()+"` ");
-		String sql = sqlWrapperToSqlAsMysql("",condition);
+		String sql = sqlWrapperToSqlAsMysql("",sqlWrapper);
 		if(StringUtils.isNotEmpty(sql)) {
 			sb.append(" where "+sql);
+		}
+		String order = this.getOrderSql(sqlWrapper.getSqlOrder());
+		if(StringUtils.isNotEmpty(order)) {
+			sb.append(" order by "+order);
 		}
 		return sb.toString();
 	}

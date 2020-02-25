@@ -7,8 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.alibaba.druid.util.StringUtils;
+
 import haoframe.core.mybatis.sql.db_enum.SqlConnector;
 import haoframe.core.mybatis.sql.db_enum.SqlOperators;
+import haoframe.core.mybatis.sql.db_enum.SqlOrderType;
 
 public class SqlWrapper {
 
@@ -32,6 +35,13 @@ public class SqlWrapper {
 		for(String field:fields) {
 			fieldNames.add(field);
 		}
+	}
+	
+	public void order(String fieldName,SqlOrderType type) {
+		if(StringUtils.isEmpty(fieldName)) {
+			return;
+		}
+		this.sqlOrder.add(fieldName, type);
 	}
 	
 	public String[] getFieldNames() {
