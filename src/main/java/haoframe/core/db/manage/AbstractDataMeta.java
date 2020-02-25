@@ -27,7 +27,7 @@ import haoframe.core.db.model.Column;
 import haoframe.core.db.model.ColumnType;
 import haoframe.core.db.model.Table;
 import haoframe.core.exception.HaoException;
-import haoframe.core.spring.SpringContext;
+import haoframe.core.frame.spring.SpringContext;
 import haoframe.core.utils.ClassUtils;
 import haoframe.core.utils.StringUtils;
 

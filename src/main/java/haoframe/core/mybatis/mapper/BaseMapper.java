@@ -11,11 +11,13 @@ import haoframe.core.mybatis.sql.SqlWrapper;
 public interface BaseMapper<T>  {
 
 	//register start 基本方法
-	public void insert(T bean);
+	public int insert(T bean);
 	
-	public void update(@Param("bean")T bean,@Param("sqlWrapper") SqlWrapper sqlWrapper);
+	public int batchInsert(@Param("beanes") List<T> beanes);
 	
-	public void delete(SqlWrapper sqlWrapper);
+	public int update(@Param("bean")T bean,@Param("sqlWrapper") SqlWrapper sqlWrapper);
+	
+	public int delete(SqlWrapper sqlWrapper);
 	
 	public T queryOne(SqlWrapper sqlWrapper);
 	
@@ -28,9 +30,9 @@ public interface BaseMapper<T>  {
 	//register end 基本方法
 	
 	//register start 基于实体操作
-	public void updateByEntity(@Param("bean")T bean,@Param("where") T where);
+	public int updateByEntity(@Param("bean")T bean,@Param("where") T where);
 	
-	public void deleteByEntity(T where);
+	public int deleteByEntity(T where);
 	
 	public T queryOneByEntity(T where);
 	
@@ -42,9 +44,9 @@ public interface BaseMapper<T>  {
 	//register end 基于实体操作
 	
 	//register start 基于主键CODE操作
-	public void deleteByCode(Object code);
+	public int deleteByCode(Object code);
 	
-	public void updateByCode(@Param("bean") T bean,@Param("code") Object code);
+	public int updateByCode(@Param("bean") T bean,@Param("code") Object code);
 	
 	public T queryOneByCode(Object code);
 	//register end 基于主键CODE操作

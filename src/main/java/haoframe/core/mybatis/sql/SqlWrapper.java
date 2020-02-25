@@ -30,29 +30,27 @@ public class SqlWrapper {
 		sqlOrder = new SqlOrder();
 	}
 	
-	public SqlWrapper(String... fields) {
-		this();
-		for(String field:fields) {
-			fieldNames.add(field);
-		}
-	}
-	
-	public void order(String fieldName,SqlOrderType type) {
-		if(StringUtils.isEmpty(fieldName)) {
-			return;
-		}
-		this.sqlOrder.add(fieldName, type);
-	}
-	
 	public String[] getFieldNames() {
 		String[] array = fieldNames.toArray(new String[fieldNames.size()]);
 		return array;
 	}
 
-	public void setFieldNames(Set<String> fieldNames) {
-		this.fieldNames = fieldNames;
+	
+	public SqlWrapper addFields(String... fields) {
+		for(String field:fields) {
+			fieldNames.add(field);
+		}
+		return this;
 	}
-
+	
+	public SqlWrapper order(String fieldName,SqlOrderType type) {
+		if(StringUtils.isEmpty(fieldName)) {
+			return this;
+		}
+		this.sqlOrder.add(fieldName, type);
+		return this;
+	}
+	
 	public Map<String, Object> getParams() {
 		return params;
 	}

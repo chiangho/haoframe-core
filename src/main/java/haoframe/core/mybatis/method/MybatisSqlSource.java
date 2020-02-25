@@ -1,5 +1,6 @@
 package haoframe.core.mybatis.method;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +67,9 @@ public class MybatisSqlSource implements SqlSource{
 		switch(method) {
 		case insert:
 			sql = getInsertSql(parameterObject);
+			break;
+		case batchInsert:
+			sql = getBatchInsertSql(parameterObject);
 			break;
 		case delete:
 			sql = getDeleteSql((SqlWrapper) parameterObject);
@@ -589,5 +593,46 @@ public class MybatisSqlSource implements SqlSource{
 		}
 		return sb.toString();
 	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private String getBatchInsertSql(Object listObject) {
+		Map<String,Object> map = (Map<String, Object>) listObject;
+		
+		List list   =  (List) map.get("param1");
+		StringBuffer sb = new StringBuffer();
+		StringBuffer fields = new StringBuffer();
+		List<String> fieldNames  = new ArrayList<String>();
+		int index=0;
+		for(String fieldName:table.getColumnMap().keySet()) {
+			Column c = table.getColumnInfo(fieldName);
+			if(index==0) {
+				fields.append("`"+c.getName()+"`");
+			}else {
+				fields.append(",`"+c.getName()+"`");
+			}
+			fieldNames.add(fieldName);
+			index++;
+		}
+		sb.append("insert into `"+table.getTableName()+"`("+fields+")values");
+		index=0;
+		for(;index<list.size();index++) {
+			StringBuffer valueSb = new StringBuffer("("); 
+			for(int i=0;i<fieldNames.size();i++) {
+				if(i==0) {
+					valueSb.append("#{beanes["+index+"]."+fieldNames.get(i)+"}");
+				}else {
+					valueSb.append(",#{beanes["+index+"]."+fieldNames.get(i)+"}");
+				}
+			}
+			if(index==(list.size()-1)) {
+				valueSb.append(");");
+			}else {
+				valueSb.append("),");
+			}
+			sb.append(valueSb);
+		}
+		return sb.toString();
+	}
+	
 	
 }

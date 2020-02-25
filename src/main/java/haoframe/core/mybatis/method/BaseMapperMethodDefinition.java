@@ -16,6 +16,7 @@ public enum BaseMapperMethodDefinition{
 	delete("delete",SqlCommandType.DELETE,null,Integer.class),
 	update("update",SqlCommandType.UPDATE,null,Integer.class),
 	insert("insert",SqlCommandType.INSERT,null,Integer.class),
+	batchInsert("batchInsert",SqlCommandType.INSERT,null,Integer.class),
 	
 	
 	updateByEntity("updateByEntity",SqlCommandType.UPDATE,null,Integer.class),
