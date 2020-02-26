@@ -15,7 +15,7 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 
 	@Autowired
 	public M mapper;
-	
+	//	///////////////////////////////////////////////写方法////////////////////////////////////////////////////////////////////////
 	
 	/**
 	 * 根据主键code在数据库中是否存在
@@ -27,7 +27,7 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 	 * @param bean
 	 * @return bean主键
 	 */
-	public boolean doSaveByCode(T bean) {
+	public boolean save(T bean) {
 		Object code = ClassUtils.getFieldValue(bean, "code");
 		if(code==null) {
 			throw new HaoException("the code can not null");
@@ -41,6 +41,37 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 		}
 		return true;
 	}
+	
+	/**
+	 * 删除
+	 * @param code
+	 */
+	public void delete(Object code) {
+		mapper.deleteByCode(code);
+	}
+	
+	public void insert(T bean) {
+		Object code = ClassUtils.getFieldValue(bean, "code");
+		if(code==null) {
+			throw new HaoException("the code can not null");
+		}
+		mapper.insert(bean);
+	}
+	
+	public void insertBatch(List<T> beans) {
+		mapper.batchInsert(beans);
+	}
+	
+	public void update(T bean) {
+		Object code = ClassUtils.getFieldValue(bean, "code");
+		if(code==null) {
+			throw new HaoException("the code can not null");
+		}
+		mapper.updateByCode(bean, code);
+	}
+	
+	
+	///////////////////////////////////////////////////读方法////////////////////////////////////////////////////////////////////////
 	
 	/**
 	 * 查询字段字段的值是否已经存在
@@ -70,12 +101,6 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 		return count>0?true:false;
 	}
 	
-	
-	
-	public void delete(Object code) {
-		mapper.deleteByCode(code);
-	}
-	
 	public List<T> query(T where) {
 		return mapper.queryListByEntity(where, null);
 	}
@@ -84,23 +109,5 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 		return mapper.queryPageListByEntity(paging, where, null);
 	}
 	
-	public void insert(T bean) {
-		Object code = ClassUtils.getFieldValue(bean, "code");
-		if(code==null) {
-			throw new HaoException("the code can not null");
-		}
-		mapper.insert(bean);
-	}
 	
-	public void insertBatch(List<T> beans) {
-		mapper.batchInsert(beans);
-	}
-	
-	public void update(T bean) {
-		Object code = ClassUtils.getFieldValue(bean, "code");
-		if(code==null) {
-			throw new HaoException("the code can not null");
-		}
-		mapper.updateByCode(bean, code);
-	}
 }
