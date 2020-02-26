@@ -3,7 +3,6 @@ package haoframe.core.frame.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import haoframe.core.exception.HaoException;
 import haoframe.core.mybatis.mapper.BaseMapper;
@@ -28,7 +27,6 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 	 * @param bean
 	 * @return bean主键
 	 */
-//	@Transactional(rollbackFor = Exception.class)
 	public boolean doSaveByCode(T bean) {
 		Object code = ClassUtils.getFieldValue(bean, "code");
 		if(code==null) {
@@ -72,18 +70,8 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 		return count>0?true:false;
 	}
 	
-	@Transactional(rollbackFor = Exception.class)
-	public void update(T bean) {
-		Object code = ClassUtils.getFieldValue(bean, "code");
-		if(code==null) {
-			throw new HaoException("the code can not null");
-		}
-		mapper.updateByCode(bean, code);
-		
-		throw new HaoException("AAA");
-	}
 	
-	@Transactional(rollbackFor = Exception.class)
+	
 	public void delete(Object code) {
 		mapper.deleteByCode(code);
 	}
@@ -96,7 +84,6 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 		return mapper.queryPageListByEntity(paging, where, null);
 	}
 	
-//	@Transactional(rollbackFor = Exception.class)
 	public void insert(T bean) {
 		Object code = ClassUtils.getFieldValue(bean, "code");
 		if(code==null) {
@@ -105,8 +92,17 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 		mapper.insert(bean);
 	}
 	
-//	@Transactional(rollbackFor = Exception.class)
 	public void insertBatch(List<T> beans) {
 		mapper.batchInsert(beans);
+	}
+	
+	public void update(T bean) {
+		Object code = ClassUtils.getFieldValue(bean, "code");
+		if(code==null) {
+			throw new HaoException("the code can not null");
+		}
+		mapper.updateByCode(bean, code);
+		
+		throw new HaoException("AAA");
 	}
 }
