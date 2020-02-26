@@ -20,9 +20,5 @@ public class SqlOrder {
 	public List<String[]> getOrderby() {
 		return orderby;
 	}
-
-	public void setOrderby(List<String[]> orderby) {
-		this.orderby = orderby;
-	}
 	
 }

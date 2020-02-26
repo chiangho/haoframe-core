@@ -8,14 +8,16 @@ import org.springframework.transaction.annotation.Transactional;
 import haoframe.core.exception.HaoException;
 import haoframe.core.mybatis.mapper.BaseMapper;
 import haoframe.core.mybatis.plugins.Paging;
+import haoframe.core.mybatis.sql.SqlOrder;
 import haoframe.core.mybatis.sql.SqlWrapper;
 import haoframe.core.mybatis.sql.db_enum.SqlOperators;
+import haoframe.core.mybatis.sql.db_enum.SqlOrderType;
 import haoframe.core.utils.ClassUtils;
 
 public abstract class BaseService<M extends BaseMapper<T>,T> {
 
 	@Autowired
-	public M mapper;
+	protected M mapper;
 	//	///////////////////////////////////////////////写方法////////////////////////////////////////////////////////////////////////
 	
 	/**
@@ -53,6 +55,10 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 		mapper.deleteByCode(code);
 	}
 	
+	/**
+	 * 插入
+	 * @param bean
+	 */
 	@Transactional(rollbackFor=Exception.class)
 	public void insert(T bean) {
 		Object code = ClassUtils.getFieldValue(bean, "code");
@@ -62,11 +68,19 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 		mapper.insert(bean);
 	}
 	
+	/**
+	 * 批量插入
+	 * @param beans
+	 */
 	@Transactional(rollbackFor=Exception.class)
 	public void insertBatch(List<T> beans) {
 		mapper.batchInsert(beans);
 	}
 	
+	/**
+	 * 更新
+	 * @param bean
+	 */
 	@Transactional(rollbackFor=Exception.class)
 	public void update(T bean) {
 		Object code = ClassUtils.getFieldValue(bean, "code");
@@ -74,14 +88,13 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 			throw new HaoException("the code can not null");
 		}
 		mapper.updateByCode(bean, code);
-		throw new HaoException("aaaa");
 	}
 	
 	
 	///////////////////////////////////////////////////读方法////////////////////////////////////////////////////////////////////////
 	
 	/**
-	 * 查询字段字段的值是否已经存在
+	 * 查询fieldName = value的数量
 	 * @param fieldName
 	 * @param value
 	 * @return
@@ -92,7 +105,7 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 	}
 	
 	/**
-	 * 查询字段字段的值是否已经存在，排序自己
+	 * 查新非此主键，fieldName=value的个数
 	 * @param fieldName
 	 * @param value
 	 * @param code
@@ -103,18 +116,73 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 		return count;
 	}
 	
+	/**
+	 * 查询主键的个数
+	 * @param code
+	 * @return
+	 */
 	public boolean codeIsExist(Object code) {
 		Integer count = (Integer) this.mapper.queryObject(new SqlWrapper().addFields("count(1)").addCondition("code",code));
 		return count>0?true:false;
 	}
 	
+	/**
+	 * 查询list
+	 * @param where
+	 * @return
+	 */
 	public List<T> query(T where) {
 		return mapper.queryListByEntity(where, null);
 	}
+	/**
+	 * 查询list
+	 * @param where
+	 * @return
+	 */
+	public List<T> query(T where,String orderFiledName,SqlOrderType orderType) {
+		SqlOrder order  = new SqlOrder();
+		order.add(orderFiledName, orderType);
+		return mapper.queryListByEntity(where, order);
+	}
 	
+	/**
+	 * 查询分页list
+	 * @param where
+	 * @param paging
+	 * @return
+	 */
 	public List<T> queryPage(T where,Paging paging){
 		return mapper.queryPageListByEntity(paging, where, null);
 	}
 	
+	/**
+	 * 查询分页list
+	 * @param where
+	 * @param paging
+	 * @return
+	 */
+	public List<T> queryPage(T where,Paging paging,String orderFiledName,SqlOrderType orderType){
+		SqlOrder order  = new SqlOrder();
+		order.add(orderFiledName, orderType);
+		return mapper.queryPageListByEntity(paging, where, order);
+	}
+	
+	/**
+	 * 根据主键查询实体
+	 * @param code
+	 * @return
+	 */
+	public T queryOne(Object code) {
+		return mapper.queryOneByCode(code);
+	}
+	
+	/**
+	 * 根据传入的实体查新
+	 * @param where
+	 * @return
+	 */
+	public T queryBean(T where) {
+		return mapper.queryOneByEntity(where);
+	}
 	
 }
