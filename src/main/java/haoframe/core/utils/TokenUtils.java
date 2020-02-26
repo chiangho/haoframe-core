@@ -11,7 +11,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
-import haoframe.core.Constant.Terminal;
+import haoframe.core.enumeration.Terminal;
 
 public class TokenUtils {
 	private static final String SECRET = "0123456789abcdef";// 秘钥
