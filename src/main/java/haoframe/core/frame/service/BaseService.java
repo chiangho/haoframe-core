@@ -102,7 +102,5 @@ public abstract class BaseService<M extends BaseMapper<T>,T> {
 			throw new HaoException("the code can not null");
 		}
 		mapper.updateByCode(bean, code);
-		
-		throw new HaoException("AAA");
 	}
 }
